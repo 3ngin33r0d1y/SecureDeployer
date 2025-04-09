@@ -1,0 +1,113 @@
+/* Custom CSS for the application with Société Générale inspired colors */
+
+:root {
+  --primary-red: #e60028;
+  --primary-black: #000000;
+  --secondary-gray: #f5f5f5;
+  --text-dark: #333333;
+  --text-light: #ffffff;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  background-color: var(--secondary-gray);
+  color: var(--text-dark);
+}
+
+/* Navbar customization */
+.navbar-dark {
+  background-color: var(--primary-black) !important;
+}
+
+.navbar-brand {
+  font-weight: 700;
+}
+
+/* Button customization */
+.btn-danger {
+  background-color: var(--primary-red);
+  border-color: var(--primary-red);
+}
+
+.btn-danger:hover, .btn-danger:focus {
+  background-color: #c50023;
+  border-color: #c50023;
+}
+
+.btn-outline-danger {
+  color: var(--primary-red);
+  border-color: var(--primary-red);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--primary-red);
+  color: var(--text-light);
+}
+
+/* Card customization */
+.card {
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.card-header {
+  background-color: var(--primary-black);
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+/* Table customization */
+.table thead th {
+  background-color: var(--primary-black);
+  color: var(--text-light);
+  border-color: #333;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(230, 0, 40, 0.05);
+}
+
+/* Form customization */
+.form-control:focus {
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 0.2rem rgba(230, 0, 40, 0.25);
+}
+
+/* Dashboard panels */
+.dashboard-stat {
+  background-color: white;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.dashboard-stat:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-stat-icon {
+  font-size: 2.5rem;
+  color: var(--primary-red);
+}
+
+.dashboard-stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-black);
+}
+
+.dashboard-stat-title {
+  color: #666;
+  font-weight: 500;
+}
+
+/* Footer customization */
+footer {
+  background-color: var(--primary-black) !important;
+  color: var(--text-light);
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}

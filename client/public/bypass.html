@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Bypass</title>
+    <script>
+        function bypassLogin() {
+            // Create a dummy token
+            const dummyToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTYxNjc2MjQwMCwiZXhwIjoxNjE2ODQ4ODAwfQ.3Thp81rDFrKXr3WrY1MyMnNK8kZ-9-MZ9RZPB6nCTnM";
+            
+            // Store the token in localStorage
+            localStorage.setItem('token', dummyToken);
+            
+            // Store user info
+            localStorage.setItem('user', JSON.stringify({
+                id: 1,
+                email: 'admin@example.com',
+                role: 'admin'
+            }));
+            
+            // Redirect to the dashboard
+            window.location.href = '/dashboard';
+        }
+    </script>
+</head>
+<body>
+    <h1>Deployment Tracker Login Bypass</h1>
+    <p>Click the button below to bypass the login and access the application as admin:</p>
+    <button onclick="bypassLogin()">Access as Admin</button>
+</body>
+</html>
