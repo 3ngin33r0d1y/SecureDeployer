@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { uploadFile, getSignedUrl } = require('../config/s3');
 const { v4: uuidv4 } = require('uuid');
+const pool = require('../config/db');
 
 // Configure multer for temporary storage
 const storage = multer.diskStorage({
@@ -47,6 +48,18 @@ const upload = multer({
 // S3 bucket name - will be fetched from Vault via s3.js
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'deployment-tracker';
 
+// Get service name by service ID
+async function getServiceName(serviceId) {
+  try {
+    const query = 'SELECT name FROM public.services WHERE id = $1';
+    const result = await pool.query(query, [serviceId]);
+    return result.rows[0]?.name || 'unknown-service';
+  } catch (error) {
+    console.error('Error getting service name:', error);
+    return 'unknown-service';
+  }
+}
+
 // Deployment Controller
 const DeploymentController = {
   // Upload middleware
@@ -63,6 +76,9 @@ const DeploymentController = {
       const { serviceId, version, changes, branchName } = req.body;
 
       try {
+        // Get service name
+        const serviceName = await getServiceName(serviceId);
+
         // Create deployment
         const deployment = await Deployment.create(serviceId, version, changes, req.user.id, branchName);
 
@@ -70,16 +86,16 @@ const DeploymentController = {
         const fileName = req.file.originalname;
         const fileType = path.extname(fileName).substring(1);
         const fileSize = req.file.size;
-        
-        // Generate S3 key
-        const s3Key = `deployments/${deployment.id}/${uuidv4()}-${fileName}`;
-        
+
+        // Generate S3 key with the requested format: /service name/version/file
+        const s3Key = `/${serviceName}/${version}/${fileName}`;
+
         // Upload file to S3
         const s3Upload = await uploadFile(req.file, S3_BUCKET_NAME, s3Key);
-        
+
         // Store S3 path instead of local file path
         const s3Path = s3Upload.Key;
-        
+
         // Create file record with S3 path
         const file = await DeploymentFile.create(
             deployment.id,
@@ -89,7 +105,7 @@ const DeploymentController = {
             fileSize,
             req.user.id
         );
-        
+
         // Remove temporary file
         fs.unlinkSync(req.file.path);
 
@@ -216,13 +232,23 @@ const DeploymentController = {
       const fileName = req.file.originalname;
       const fileType = path.extname(fileName).substring(1);
       const fileSize = req.file.size;
-      
-      // Generate S3 key
-      const s3Key = `deployments/${deploymentId}/${uuidv4()}-${fileName}`;
-      
+
+      // Get deployment to access service and version information
+      const deployment = await Deployment.findById(deploymentId);
+      if (!deployment) {
+        return res.status(404).json({ message: 'Deployment not found' });
+      }
+
+      // Get service name
+      const serviceName = deployment.service_name || await getServiceName(deployment.service_id);
+      const version = deployment.version;
+
+      // Generate S3 key with the requested format: /service name/version/file
+      const s3Key = `/${serviceName}/${version}/${fileName}`;
+
       // Upload file to S3
       const s3Upload = await uploadFile(req.file, S3_BUCKET_NAME, s3Key);
-      
+
       // Store S3 path instead of local file path
       const s3Path = s3Upload.Key;
 
@@ -234,7 +260,7 @@ const DeploymentController = {
           fileSize,
           req.user.id
       );
-      
+
       // Remove temporary file
       fs.unlinkSync(req.file.path);
 
@@ -259,7 +285,7 @@ const DeploymentController = {
 
       // Generate a pre-signed URL for the S3 file
       const signedUrl = await getSignedUrl(S3_BUCKET_NAME, file.file_path, 3600);
-      
+
       // Redirect to the pre-signed URL
       res.redirect(signedUrl);
     } catch (error) {
